@@ -1,0 +1,6 @@
+flask
+line-bot-sdk
+google-auth-oauthlib
+google-api-python-client
+google-auth-httplib2
+gunicorn
