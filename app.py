@@ -7,8 +7,8 @@ from calendar_service import add_event
 
 app = Flask(__name__)
 
-LINE_CHANNEL_ACCESS_TOKEN = "4mIAFJbMr129dIk1kbwLT/qY3bQJmgH9j3ihzYy/MWs5lb+Q00IQzqJzibckwOfxrKXC6V1br1YmhbBnEIx58Xrk2fUTy0uo0Jaf9SZdcWdRqjHvNIuQRjeLudF3OLWmdjNfK87apJd3ylEHYmtesQdB04t89/1O/w1cDnyilFU="
-LINE_CHANNEL_SECRET = "88dbb9da634f6828029c7bf2db5188fd"
+LINE_CHANNEL_ACCESS_TOKEN = "xvUJlN0/VCo/rGI2+I2W1jKaHSqLDxUSJVqqOo1YUe4PdBwnoVsHjXd4TXHwVg/OrKXC6V1br1YmhbBnEIx58Xrk2fUTy0uo0Jaf9SZdcWdK1Ut//KZG6QJUKd+WqFkp1f7+bKHCLVKB4SGKP3emewdB04t89/1O/w1cDnyilFU="
+LINE_CHANNEL_SECRET = "b89ace0e9d2968531964d4409278e97c"
 
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
@@ -52,4 +52,5 @@ def handle_message(event):
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))
+
     app.run(host='0.0.0.0', port=port)
