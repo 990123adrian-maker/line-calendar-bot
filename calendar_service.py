@@ -7,7 +7,7 @@ def add_event(event_data):
     token_info = json.loads(os.environ.get("GOOGLE_TOKEN"))
     creds = Credentials.from_authorized_user_info(token_info)
 
-    service = build("calendar", "v3", credentials=creds
+   service = build("calendar", "v3", credentials=creds)
 
     event = {
         "summary": event_data["title"],
@@ -17,3 +17,4 @@ def add_event(event_data):
 
 
     service.events().insert(calendarId="primary", body=event).execute()
+
