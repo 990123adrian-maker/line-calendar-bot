@@ -5,14 +5,14 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-from calendar_service import add_event 
+from calendar_service import add_event
 
 app = Flask(__name__)
 
 line_bot_api = LineBotApi(os.environ.get("LINE_CHANNEL_ACCESS_TOKEN"))
 handler = WebhookHandler(os.environ.get("LINE_CHANNEL_SECRET"))
 
-@app.route("/callback", method=['POST'])
+@app.route("/callback", methods=['POST'])
 def callback():
     signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text=True)
@@ -37,7 +37,7 @@ def handle_message(event):
                 data['start'] = line.replace('開始：', '').strip()
             if '結束：' in line:
                 data['end'] = line.replace('結束：', '').strip()
-                
+
         if not all(key in data for key in ['title', 'start', 'end']):
             return
 
@@ -50,7 +50,6 @@ def handle_message(event):
 
     except Exception as e:
         error_msg = f"❌ 發生錯誤：{str(e)}"
-        print(error_msg) 
         line_bot_api.reply_message(
             reply_token,
             TextSendMessage(text=error_msg)
