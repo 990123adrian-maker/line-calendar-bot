@@ -1,56 +1,61 @@
+import os
+import json
+from datetime import datetime
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
+from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-
-from parser import parse_event
-from calendar_service import add_event
+from calendar_service import add_event 
 
 app = Flask(__name__)
 
-LINE_CHANNEL_ACCESS_TOKEN = "xvUJlN0/VCo/rGI2+I2W1jKaHSqLDxUSJVqqOo1YUe4PdBwnoVsHjXd4TXHwVg/OrKXC6V1br1YmhbBnEIx58Xrk2fUTy0uo0Jaf9SZdcWdK1Ut//KZG6QJUKd+WqFkp1f7+bKHCLVKB4SGKP3emewdB04t89/1O/w1cDnyilFU="
-LINE_CHANNEL_SECRET = "b89ace0e9d2968531964d4409278e97c"
+line_bot_api = LineBotApi(os.environ.get("LINE_CHANNEL_ACCESS_TOKEN"))
+handler = WebhookHandler(os.environ.get("LINE_CHANNEL_SECRET"))
 
-line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
-handler = WebhookHandler(LINE_CHANNEL_SECRET)
-
-
-@app.route("/callback", methods=["POST"])
+@app.route("/callback", method=['POST'])
 def callback():
-    signature = request.headers.get("X-Line-Signature")
+    signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text=True)
-
     try:
         handler.handle(body, signature)
-    except:
+    except InvalidSignatureError:
         abort(400)
-
-    return "OK"
-
+    return 'OK'
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    text = event.message.text
-
-    if not text.startswith("標題:"):
-        return
-
+    reply_token = event.reply_token
+    user_text = event.message.text
+    
     try:
-        event_data = parse_event(text)
-        add_event(event_data)
+        lines = user_text.split('\n')
+        data = {}
+        for line in lines:
+            if '標題：' in line:
+                data['title'] = line.replace('標題：', '').strip()
+            if '開始：' in line:
+                data['start'] = line.replace('開始：', '').strip()
+            if '結束：' in line:
+                data['end'] = line.replace('結束：', '').strip()
+                
+        if not all(key in data for key in ['title', 'start', 'end']):
+            return
 
+        add_event(data)
+        
         line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage("✅ 活動已加入 Google Calendar")
+            reply_token,
+            TextSendMessage(text=f"✅ 已成功加入日曆：\n{data['title']}")
         )
+
     except Exception as e:
+        error_msg = f"❌ 發生錯誤：{str(e)}"
+        print(error_msg) 
         line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(f"❌ 失敗：{e}")
+            reply_token,
+            TextSendMessage(text=error_msg)
         )
-
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 5000))
-
     app.run(host='0.0.0.0', port=port)
