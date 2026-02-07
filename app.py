@@ -57,8 +57,8 @@ def google_callback():
             user.token_json = creds.to_json()
         else:
             new_user = UserToken(line_userid=line_id, token_json=creds.to_json())
-            db.add(new_user)
-        db.commit()
+            db.session.add(new_user)
+        db.session.commit()
         return "<h1>✅ 綁定成功！</h1><p>現在可以回到 LINE 傳送行程了。</p>"
     return "❌ 錯誤：找不到您的 LINE ID，請重新從 LINE 點擊連結。"
 
